@@ -1,0 +1,28 @@
+from colorama import Back, Fore
+
+import config
+from generic import GenericObject
+
+
+class Paddle(GenericObject):
+    TYPE = "paddle"
+
+    def __init__(self):
+        super().__init__([11, 2], config.BACK_COLOR + "🧱")
+        self._x = round(config.FRAME_WIDTH/2 - round(self._shape[0]/2)) - 2
+        self._y = round(config.FRAME_HEIGHT - 2)
+
+    @property
+    def get_x(self):
+        return self._x
+
+    @property
+    def get_y(self):
+        return self._y
+
+    def update_paddle(self, value, ball):
+        obj = self
+        if config.FRAME_WIDTH - 2*obj.get_shape[0] >= obj.get_x + value >= 0:
+            obj.set_x(obj.get_x + value)
+            if ball.get_velocity == [0, 0]:
+                ball.set_x(ball.get_x + value)
