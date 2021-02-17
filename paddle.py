@@ -8,8 +8,12 @@ class Paddle(GenericObject):
     TYPE = "paddle"
 
     def __init__(self):
-        super().__init__([11, 2], config.BACK_COLOR + "🧱")
-        self._x = round(config.FRAME_WIDTH/2 - round(self._shape[0]/2)) - 2
+        if config.DEBUG:
+            super().__init__([86, 2], config.BACK_COLOR + "🧱")
+            self._x = 0
+        else:
+            super().__init__([11, 2], config.BACK_COLOR + "🧱")
+            self._x = round(config.FRAME_WIDTH/2 - round(self._shape[0]/2)) - 2
         self._y = round(config.FRAME_HEIGHT - 2)
 
     @property

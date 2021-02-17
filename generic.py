@@ -1,36 +1,6 @@
 import numpy as np
-from colorama import Fore
 
 import config
-from utils import filler
-
-
-def connector(grid, hgt, wdt, color):
-    assert  len(grid) == len(color)
-    assert  len(grid[0]) == len(color[0])
-
-    res = np.array([])
-
-    for row in range(hgt):
-        for col in range(wdt):
-            curr_str = ""
-            color_val = color[row][col]
-
-            if color_val[0]:
-                curr_str += color_val[0]
-            else:
-                curr_str += Fore.BLACK
-
-            if color_val[1]:
-                curr_str += color_val[1]
-            else:
-                curr_str += config.BACK_COLOR
-
-            curr_str += grid[row][col]
-            res = np.append(res, curr_str)
-
-    res = res.reshape((hgt, wdt))
-    return res
 
 class GenericObject:
     currently_active = 0
@@ -67,9 +37,19 @@ class GenericObject:
     def get_x(self):
         return self._x
 
+    @property
+    def get_y(self):
+        return self._y
+
     def set_x(self, value):
         self._x = value
+
+    def set_y(self, value):
+        self._y = value
 
     @property
     def get_shape(self):
         return self._shape
+
+    def set_shape(self, value):
+        self._shape = value

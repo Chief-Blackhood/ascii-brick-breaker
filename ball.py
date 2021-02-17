@@ -12,6 +12,7 @@ class Ball(GenericObject):
         super().__init__([1, 1], config.BACK_COLOR + "🌎")
         self._x = 0
         self._y = config.FRAME_HEIGHT
+        # self._y = 2
         self._velocity = [0, 0]
 
     @property
