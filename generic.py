@@ -53,3 +53,6 @@ class GenericObject:
 
     def set_shape(self, value):
         self._shape = value
+
+    def set_element(self, value):
+        self._element = value

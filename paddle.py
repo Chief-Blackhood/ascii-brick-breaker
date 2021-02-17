@@ -15,14 +15,14 @@ class Paddle(GenericObject):
             super().__init__([11, 2], config.BACK_COLOR + "🧱")
             self._x = round(config.FRAME_WIDTH/2 - round(self._shape[0]/2)) - 2
         self._y = round(config.FRAME_HEIGHT - 2)
+        self._sticky = False
 
     @property
-    def get_x(self):
-        return self._x
+    def get_sticky(self):
+        return self._sticky
 
-    @property
-    def get_y(self):
-        return self._y
+    def set_sticky(self, value):
+        self._sticky = value
 
     def update_paddle(self, value, ball):
         obj = self

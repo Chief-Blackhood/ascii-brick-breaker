@@ -14,10 +14,21 @@ class Ball(GenericObject):
         self._y = config.FRAME_HEIGHT
         # self._y = 2
         self._velocity = [0, 0]
+        self._temp_velocity = [1, 1]
 
     @property
     def get_velocity(self):
         return self._velocity
+
+    @property
+    def get_temp_velocity(self):
+        return self._temp_velocity
+
+    def set_velocity(self, value):
+        self._velocity = value
+
+    def set_temp_velocity(self, value):
+        self._temp_velocity = value
 
     @property
     def get_x(self):
@@ -48,5 +59,8 @@ class Ball(GenericObject):
         if ball.get_y >= config.FRAME_HEIGHT - 1:
             velocity[0] = velocity[1] = 0
 
-    def give_velocity(self):
-        self._velocity = [1, 1]
+    def give_velocity(self, sticky):
+        if sticky and self._temp_velocity != [0, 0]:
+            self._velocity = self._temp_velocity
+        else:
+            self._velocity = [1, 1]
