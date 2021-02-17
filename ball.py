@@ -13,6 +13,7 @@ class Ball(GenericObject):
         self._x = 0
         self._y = config.FRAME_HEIGHT
         # self._y = 2
+        self._through_ball = False
         self._velocity = [0, 0]
         self._temp_velocity = [1, 1]
 
@@ -24,11 +25,18 @@ class Ball(GenericObject):
     def get_temp_velocity(self):
         return self._temp_velocity
 
+    @property
+    def get_through_ball(self):
+        return self._through_ball
+
     def set_velocity(self, value):
         self._velocity = value
 
     def set_temp_velocity(self, value):
         self._temp_velocity = value
+
+    def set_through_ball(self, value):
+        self._through_ball = value
 
     @property
     def get_x(self):

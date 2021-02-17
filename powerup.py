@@ -20,8 +20,6 @@ class GenericPowerUp(GenericObject):
         return self._variety
 
 
-
-
 class ExpandPaddle(GenericPowerUp):
     def __init__(self):
         super().__init__()
@@ -59,7 +57,6 @@ class SpeedUpBall(GenericPowerUp):
 
     def activate_power_up(self, obj):
         config.FRAME_RATE = min(25, config.FRAME_RATE + 5)
-        obj.set_element(config.BACK_COLOR + "🧿")
 
     @property
     def get_element(self):
@@ -77,3 +74,17 @@ class StickyPaddle(GenericPowerUp):
     @property
     def get_element(self):
         return config.BACK_COLOR + "🍭"
+
+
+class ThroughBall(GenericPowerUp):
+    def __init__(self):
+        super().__init__()
+        self._variety = 5
+
+    def activate_power_up(self, obj):
+        obj.set_through_ball(True)
+        obj.set_element(config.BACK_COLOR + "🔥")
+
+    @property
+    def get_element(self):
+        return config.BACK_COLOR + "🧿"
