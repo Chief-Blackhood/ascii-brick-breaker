@@ -1,12 +1,7 @@
-import numpy as np
-
-import config
-
 class GenericObject:
     TYPE = "generic"
 
     def __init__(self, shape, element):
-        self.__class__.currently_active += 1
         self._shape = shape
         self._element = element
 
@@ -23,9 +18,9 @@ class GenericObject:
 
         else:
             return {
-            "coord": [self._y, self._x],
-            "size": self._shape,
-        }
+                "coord": [self._y, self._x],
+                "size": self._shape,
+            }
 
     @property
     def get_element(self):

@@ -8,7 +8,6 @@ class GenericPowerUp(GenericObject):
 
     def __init__(self):
         super().__init__([2, 1], config.BACK_COLOR + "💪")
-        self._active_time = 300
         self._x = 0
         self._y = 0
         self._variety = 0
@@ -89,7 +88,8 @@ class ThroughBall(GenericPowerUp):
     @property
     def get_element(self):
         return config.BACK_COLOR + "🧿"
-    
+
+
 class BallMultiplier(GenericPowerUp):
     def __init__(self):
         super().__init__()
@@ -108,7 +108,6 @@ class BallMultiplier(GenericPowerUp):
                 temp_balls.append(new_ball)
 
         return temp_balls
-
 
     @property
     def get_element(self):
