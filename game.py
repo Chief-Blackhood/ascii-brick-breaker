@@ -19,45 +19,22 @@ from utils import clear_terminal_screen, reposition_cursor, get_key_pressed, cle
 class Game:
     _refresh_time = 1 / FRAME_RATE
     brick_string = [
-        # "1",
-        # "111",
-
-        # "00000010000000000000",
-        # "00000001000000000000",
-        # "00001100000000110000",
-        # "00110010000001001100",
-        # "01111101000010111110",
-        # "11111110111101111111",
-        # "11111111000011111111",
-        # "11111111111111111111",
-        # "11111111111111111111",
-        # "11111111111111111111",
-        # "11111111111111111111",
-        # "01111111111111111110",
-        # "00111111111111111100",
-        # "00011111111111111000",
-        # "00001111111111110000",
-        # "00000111111111100000",
-        # "00000011111111000000",
-        # "00000001111110000000",
-        # "00000000111100000000",
-        # "00000000011000000000",
-        # "00000111111111100000",
-        # "00000111111111100000",
-        # "00000111111111100000",
-        # "00000111111111100000",
-        # "00000111111111100000",
-        # "00000111111111100000",
-        # "00000111111111100000",
-        "00010111111111101000",
-        "00010111111111101000",
-        "00010111111111101000",
-        "00010111111111101000",
-        "00010111111111101000",
-        "00010111111111101000",
-        "00010111111111101000",
-        "00010000000000001000",
-        "00011111111111111000",
+        "00000111111111100000",
+        "00000111111111100000",
+        "00000111111111100000",
+        "00000111111111100000",
+        "00000111111111100000",
+        "00000111111111100000",
+        "00000111111111100000",
+        # "00020211111111202000",
+        # "00010111111111101000",
+        # "00020111111111102000",
+        # "00010111111111101000",
+        # "00010111111111101000",
+        # "00020111111111102000",
+        # "00010211111111201000",
+        # "00010000000000001000",
+        # "00021112111121112000",
     ]
 
     def _draw_in_range(self, info, obj):
@@ -82,6 +59,9 @@ class Game:
         clear_terminal_screen()
         self.__bricks = []
         self.__powerup_shown = []
+        self.__lives = 8
+        self.__score = 0
+        self.__time = 0
         self.__active_powerup = [[False, 0], [False, 0], [False, 0], [False, 0], [False, 0], [False, 0]]
         self._initialize_bricks()
         self._loop()
@@ -91,7 +71,11 @@ class Game:
             for col in range(len(self.brick_string[0])):
                 if self.brick_string[row][col] != '0':
                     brick = Brick()
-                    brick.set_variety(random.randint(1, 4))
+                    # if self.brick_string[row][col] == '2':
+                    #     brick.set_variety(4)
+                    # else:
+                    #     brick.set_variety(random.randint(1, 3))
+                    brick.set_variety(1)
                     brick.set_x(5 + 2 * brick.get_shape[0] * col)
                     brick.set_y(10 + brick.get_shape[1] * row)
                     self.__bricks.append(brick)
@@ -103,6 +87,7 @@ class Game:
             if ball.get_velocity == [0, 0] and ball.get_y >= config.FRAME_HEIGHT - 1:
                 ball.set_x(paddle.get_x + random.randint(0, 2 * floor(paddle.get_shape[0]) - 1))
                 ball.set_y(paddle.get_y - 1)
+                self.__lives -= 1
         else:
             for ball in self.__balls:
                 if ball.get_velocity == [0, 0] and ball.get_y >= config.FRAME_HEIGHT - 1:
@@ -126,7 +111,8 @@ class Game:
                         for ball in self.__balls:
                             obj.activate_power_up(ball)
                     elif obj.get_variety == 6:
-                        self.__balls = obj.activate_power_up(self.__balls)
+                        if len(self.__balls) <= 10:
+                            self.__balls = obj.activate_power_up(self.__balls)
 
                 self.__powerup_shown.remove(obj)
 
@@ -202,6 +188,9 @@ class Game:
 
     def _info_print(self):
         pass
+        print("⏱ Time: ", self.__time)
+        print("💓 Lives: ", self.__lives)
+        print("Score: ", self.__score)
         # for obj in self.__bricks:
         #     print(obj.draw())
         # print(self.__paddle.draw())
@@ -217,11 +206,16 @@ class Game:
 
     def _loop(self):
         self.__game_status = 1
+        frames_looped = 0
 
         last_key_pressed = ""
         clear_terminal_screen()
 
         while self.__game_status == 1:
+            frames_looped += 1
+            if frames_looped >= config.FRAME_RATE:
+                frames_looped = 0
+                self.__time += 1
             start = time.time()
             reposition_cursor()
             self._count += 1
@@ -316,6 +310,7 @@ class Game:
 
             if brick_hit.get_variety == 1 or self.__ball.get_through_ball:
                 del self.__bricks[index]
+                self.__score += 100
                 probability_of_powerup = random.random()
                 if probability_of_powerup >= 0.85:
                     variety = random.randint(1, 6)
