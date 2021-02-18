@@ -3,8 +3,6 @@ import numpy as np
 import config
 
 class GenericObject:
-    currently_active = 0
-    DEAD_FLAG = 1
     TYPE = "generic"
 
     def __init__(self, shape, element):

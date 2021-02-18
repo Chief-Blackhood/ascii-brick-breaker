@@ -12,7 +12,7 @@ from brick import Brick
 from config import FRAME_RATE
 from kbhit import KBHit
 from paddle import Paddle
-from powerup import ShrinkPaddle, ExpandPaddle, SpeedUpBall, StickyPaddle, ThroughBall
+from powerup import ShrinkPaddle, ExpandPaddle, SpeedUpBall, StickyPaddle, ThroughBall, BallMultiplier
 from utils import clear_terminal_screen, reposition_cursor, get_key_pressed, clear_buffer
 
 
@@ -42,13 +42,22 @@ class Game:
         # "00000001111110000000",
         # "00000000111100000000",
         # "00000000011000000000",
-        "00000111111111100000",
-        "00000111111111100000",
-        "00000111111111100000",
-        "00000111111111100000",
-        "00000111111111100000",
-        "00000111111111100000",
-        "00000111111111100000",
+        # "00000111111111100000",
+        # "00000111111111100000",
+        # "00000111111111100000",
+        # "00000111111111100000",
+        # "00000111111111100000",
+        # "00000111111111100000",
+        # "00000111111111100000",
+        "00010111111111101000",
+        "00010111111111101000",
+        "00010111111111101000",
+        "00010111111111101000",
+        "00010111111111101000",
+        "00010111111111101000",
+        "00010111111111101000",
+        "00010000000000001000",
+        "00011111111111111000",
     ]
 
     def _draw_in_range(self, info, obj):
@@ -68,6 +77,8 @@ class Game:
         self.__keys = KBHit()
         self.__paddle = Paddle()
         self.__ball = Ball()
+        self.__balls = []
+        self.__balls.append(self.__ball)
         clear_terminal_screen()
         self.__bricks = []
         self.__powerup_shown = []
@@ -80,17 +91,22 @@ class Game:
             for col in range(len(self.brick_string[0])):
                 if self.brick_string[row][col] != '0':
                     brick = Brick()
-                    brick._variety = random.randint(1, 3)
+                    brick._variety = random.randint(1, 4)
                     brick._x = 5 + 2 * brick.get_shape[0] * col
                     brick._y = 10 + brick.get_shape[1] * row
                     self.__bricks.append(brick)
 
     def _initialize_ball(self):
-        ball = self.__ball
-        paddle = self.__paddle
-        if ball.get_velocity == [0, 0] and ball.get_y >= config.FRAME_HEIGHT - 1:
-            ball._x = paddle.get_x + random.randint(0, 2 * floor(paddle.get_shape[0]) - 1)
-            ball._y = paddle.get_y - 1
+        if len(self.__balls) == 1:
+            ball = self.__balls[0]
+            paddle = self.__paddle
+            if ball.get_velocity == [0, 0] and ball.get_y >= config.FRAME_HEIGHT - 1:
+                ball._x = paddle.get_x + random.randint(0, 2 * floor(paddle.get_shape[0]) - 1)
+                ball._y = paddle.get_y - 1
+        else:
+            for ball in self.__balls:
+                if ball.get_velocity == [0, 0] and ball.get_y >= config.FRAME_HEIGHT - 1:
+                    self.__balls.remove(ball)
 
     def _draw_bricks(self):
         for obj in self.__bricks:
@@ -107,7 +123,10 @@ class Game:
                     if obj.get_variety == 1 or obj.get_variety == 2 or obj.get_variety == 4:
                         obj.activate_power_up(self.__paddle)
                     elif obj.get_variety == 3 or obj.get_variety == 5:
-                        obj.activate_power_up(self.__ball)
+                        for ball in self.__balls:
+                            obj.activate_power_up(ball)
+                    elif obj.get_variety == 6:
+                        self.__balls = obj.activate_power_up(self.__balls)
 
                 self.__powerup_shown.remove(obj)
 
@@ -144,7 +163,8 @@ class Game:
 
         self._draw_in_range(self.__paddle.draw(), self.__paddle.get_element)
         self._draw_bricks()
-        self._draw_in_range(self.__ball.draw(), self.__ball.get_element)
+        for ball in self.__balls:
+            self._draw_in_range(ball.draw(), self.__ball.get_element)
         self._draw_powerups()
 
         sra = str(Style.RESET_ALL)
@@ -168,11 +188,14 @@ class Game:
         if cin == -1:
             self._terminate(-1)
         elif cin == 'a':
-            self.__paddle.update_paddle(-2, self.__ball)
+            for ball in self.__balls:
+                self.__paddle.update_paddle(-2, ball)
         elif cin == 'd':
-            self.__paddle.update_paddle(2, self.__ball)
+            for ball in self.__balls:
+                self.__paddle.update_paddle(2, ball)
         elif cin == ' ':
-            self.__ball.give_velocity(self.__paddle.get_sticky)
+            for ball in self.__balls:
+                ball.give_velocity(self.__paddle.get_sticky)
 
         clear_buffer()
         return cin
@@ -188,7 +211,8 @@ class Game:
         # print(self._count)
         # print(x,y)
         # # print(self.__paddle.get_x, self.__paddle.get_y)
-        # print(self.__ball.draw())
+        # for ball in self.__balls:
+        #     print(ball.draw())
         # print(self.__ball.get_velocity)
 
     def _loop(self):
@@ -198,11 +222,12 @@ class Game:
         clear_terminal_screen()
 
         while self.__game_status == 1:
-            # start = time.time()
+            start = time.time()
             reposition_cursor()
             self._count += 1
             self._detect_brick_ball_collision()
-            self.__ball.update_ball()
+            for ball in self.__balls:
+                ball.update_ball()
             self._update_powerups()
             self._initialize_ball()
             self._detect_ball_paddle_collision()
@@ -221,99 +246,95 @@ class Game:
         return self.__grid
 
     def _detect_ball_paddle_collision(self):
-        if self.__paddle.get_x - 1 <= self.__ball.get_x <= self.__paddle.get_x + self.__paddle.get_shape[0] * 2 \
-                and self.__ball.get_y == self.__paddle.get_y - 1:
-            self.__ball.get_velocity[1] = -self.__ball.get_velocity[1]
-            if self.__ball.get_velocity[1] != 0:
-                center = round(self.__paddle.get_x + self.__paddle.get_shape[0])
-                distance = self.__ball.get_x - center
-                self.__ball.get_velocity[0] = self.__ball.get_velocity[0] + round(
-                    distance / self.__paddle.get_shape[0] * 2)
-            if self.__paddle.get_sticky:
-                if self.__ball.get_velocity != [0, 0]:
-                    self.__ball.set_temp_velocity(self.__ball.get_velocity)
-                self.__ball.set_velocity([0, 0])
+        for ball in self.__balls:
+            if self.__paddle.get_x - 1 <= ball.get_x <= self.__paddle.get_x + self.__paddle.get_shape[0] * 2 \
+                    and ball.get_y == self.__paddle.get_y - 1:
+                ball.get_velocity[1] = -ball.get_velocity[1]
+                if ball.get_velocity[1] != 0:
+                    center = round(self.__paddle.get_x + self.__paddle.get_shape[0])
+                    distance = ball.get_x - center
+                    ball.get_velocity[0] = ball.get_velocity[0] + round(
+                        distance / self.__paddle.get_shape[0] * 2)
+                if self.__paddle.get_sticky:
+                    if ball.get_velocity != [0, 0]:
+                        ball.set_temp_velocity(self.__ball.get_velocity)
+                    ball.set_velocity([0, 0])
 
     def _detect_brick_ball_collision(self):
-        iterations = 20
-        ball = self.__ball
-        brick_hit = None
-        step = 0
-        index = -1
-        got = False
-        for i in range(1, iterations + 1):
-            if ball.get_velocity[0] == 1:
-                x_f = ball.get_x + 1.5 * i * ball.get_velocity[0] / iterations + 0.5  # (1 1)
-            else:
-                x_f = ball.get_x + i * ball.get_velocity[0] / iterations + 0.5  # (1 1)
-            y_f = ball.get_y - i * ball.get_velocity[1] / iterations
-            for j, brick in enumerate(self.__bricks):
-                # print(x_f, y_f)
-                if brick.get_x <= x_f < brick.get_x + brick.get_shape[0] * 2 and brick.get_y <= y_f <= brick.get_y + \
-                        brick.get_shape[1] - 1:
-                    brick_hit = brick
-                    step = i
-                    index = j
-                    got = True
-                    # print(x_f, y_f)
+        for ball in self.__balls:
+            iterations = 10
+            brick_hit = None
+            step = 0
+            index = -1
+            got = False
+            for i in range(1, iterations + 1):
+                if ball.get_velocity[0] == 1:
+                    x_f = ball.get_x + 1.5 * i * ball.get_velocity[0] / iterations + 0.5  # (1 1)
+                else:
+                    x_f = ball.get_x + i * ball.get_velocity[0] / iterations + 0.5  # (1 1)
+                y_f = ball.get_y - i * ball.get_velocity[1] / iterations
+                for j, brick in enumerate(self.__bricks):
+                    if brick.get_x <= x_f < brick.get_x + brick.get_shape[0] * 2 and brick.get_y <= y_f <= brick.get_y + \
+                            brick.get_shape[1] - 1:
+                        brick_hit = brick
+                        step = i
+                        index = j
+                        got = True
+                        break
+                if got:
                     break
-            if got:
-                # print("got hello")
-                break
 
-        if not got:
-            return
-        x_previous = ball.get_x + (step - 1) * ball.get_velocity[0] / iterations + 0.5
-        y_previous = ball.get_y - (step - 1) * ball.get_velocity[1] / iterations
+            if not got:
+                continue
+            x_previous = ball.get_x + (step - 1) * ball.get_velocity[0] / iterations + 0.5
+            y_previous = ball.get_y - (step - 1) * ball.get_velocity[1] / iterations
 
-        # print(x_previous, y_previous)
-        # print(brick_hit.get_shape[1]+ brick_hit.get_y - 1)
-        # print(brick_hit.get_y + brick_hit.get_shape[1])
-        # print(brick_hit.get_x, brick_hit.get_y)#brick_hit.get_x + brick_hit.get_shape[0]*2)
-        if not self.__ball.get_through_ball:
-            if brick_hit.get_x - 1 <= x_previous <= brick_hit.get_x + brick_hit.get_shape[0] * 2 + 1 \
-                    and (y_previous < brick_hit.get_y or y_previous >= brick_hit.get_y + brick_hit.get_shape[1] - 1):
-                # print("hello")
-                ball._x = floor(x_previous)
-                if y_previous < brick_hit.get_y:
-                    ball._y = brick_hit.get_y - 1
+            if not self.__ball.get_through_ball:
+                if brick_hit.get_x - 1 <= x_previous <= brick_hit.get_x + brick_hit.get_shape[0] * 2 + 1 \
+                        and (y_previous < brick_hit.get_y or y_previous >= brick_hit.get_y + brick_hit.get_shape[1] - 1):
+                    ball._x = floor(x_previous)
+                    if y_previous < brick_hit.get_y:
+                        ball._y = brick_hit.get_y - 1
+                    else:
+                        ball._y = brick_hit.get_y + brick_hit.get_shape[1]
+                    ball._velocity[1] *= -1
+
+                elif brick_hit.get_x >= x_previous or x_previous >= brick_hit.get_x + brick_hit.get_shape[0] * 2 \
+                        and (brick_hit.get_y <= y_previous < brick_hit.get_y + brick_hit.get_shape[1]):
+                    # print("hello")
+                    if brick_hit.get_x >= x_previous:
+                        ball._x = brick_hit.get_x - 2
+                    else:
+                        ball._x = brick_hit.get_x + brick_hit.get_shape[0] * 2 - 1
+                    ball._y = int(y_previous)
+                    ball._velocity[0] *= -1
+
                 else:
-                    ball._y = brick_hit.get_y + brick_hit.get_shape[1]
-                ball._velocity[1] *= -1
+                    ball._velocity[0] *= -1
+                    ball._velocity[1] *= -1
+                    ball._y = round(y_previous)
+                    ball._x = round(x_previous)
 
-            elif brick_hit.get_x >= x_previous or x_previous >= brick_hit.get_x + brick_hit.get_shape[0] * 2 \
-                    and (brick_hit.get_y <= y_previous < brick_hit.get_y + brick_hit.get_shape[1]):
-                # print("hello")
-                if brick_hit.get_x >= x_previous:
-                    ball._x = brick_hit.get_x - 2
-                else:
-                    ball._x = brick_hit.get_x + brick_hit.get_shape[0] * 2 - 1
-                ball._y = int(y_previous)
-                ball._velocity[0] *= -1
-
+            if brick_hit.get_variety == 1 or self.__ball.get_through_ball:
+                del self.__bricks[index]
+                probability_of_powerup = random.random()
+                if probability_of_powerup >= 0.5:
+                    variety = random.randint(1, 6)
+                    switcher = {
+                        1: ExpandPaddle(),
+                        2: ShrinkPaddle(),
+                        3: SpeedUpBall(),
+                        4: StickyPaddle(),
+                        5: ThroughBall(),
+                        6: BallMultiplier()
+                    }
+                    powerup = switcher[variety]
+                    powerup.set_x(brick_hit.get_x + 2)
+                    powerup.set_y(brick_hit.get_y)
+                    self.__powerup_shown.append(powerup)
             else:
-                ball._velocity[0] *= -1
-                ball._velocity[1] *= -1
-                ball._y = round(y_previous)
-                ball._x = round(x_previous)
-
-        if brick_hit.get_variety == 1 or self.__ball.get_through_ball:
-            del self.__bricks[index]
-            variety = random.randint(1, 5)
-            # powerup = ExpandPaddle() if variety == 1 else ShrinkPaddle()
-            switcher = {
-                1: ExpandPaddle(),
-                2: ShrinkPaddle(),
-                3: SpeedUpBall(),
-                4: StickyPaddle(),
-                5: ThroughBall(),
-            }
-            powerup = switcher[variety]
-            powerup.set_x(brick_hit.get_x + 2)
-            powerup.set_y(brick_hit.get_y)
-            self.__powerup_shown.append(powerup)
-        else:
-            brick_hit.set_variety(brick_hit.get_variety - 1)
+                if brick_hit.get_variety != 4:
+                    brick_hit.set_variety(brick_hit.get_variety - 1)
 
     # def _detect_brick_ball_collision(self):
     #     iterations = 20

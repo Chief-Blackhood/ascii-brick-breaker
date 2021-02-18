@@ -24,3 +24,5 @@ class Brick(GenericObject):
             return config.BACK_COLOR + "🟧"
         if self._variety == 3:
             return config.BACK_COLOR + "🟥"
+        if self._variety == 4:
+            return config.BACK_COLOR + "⬛"

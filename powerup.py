@@ -1,4 +1,5 @@
 import config
+from ball import Ball
 from generic import GenericObject
 
 
@@ -88,3 +89,27 @@ class ThroughBall(GenericPowerUp):
     @property
     def get_element(self):
         return config.BACK_COLOR + "🧿"
+    
+class BallMultiplier(GenericPowerUp):
+    def __init__(self):
+        super().__init__()
+        self._variety = 6
+
+    def activate_power_up(self, obj):
+        temp_balls = []
+        for ball in obj:
+            if ball.get_velocity != [0, 0]:
+                new_ball = Ball()
+                velocity = ball.get_velocity
+                new_ball.set_velocity([-velocity[0], -velocity[1]])
+                new_ball.set_x(ball.get_x)
+                new_ball.set_y(ball.get_y)
+                temp_balls.append(ball)
+                temp_balls.append(new_ball)
+
+        return temp_balls
+
+
+    @property
+    def get_element(self):
+        return config.BACK_COLOR + "🍒"
