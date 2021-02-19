@@ -1,6 +1,3 @@
-from math import floor
-from random import randint
-
 import config
 from generic import GenericObject
 

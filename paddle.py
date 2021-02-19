@@ -1,5 +1,3 @@
-from colorama import Back, Fore
-
 import config
 from generic import GenericObject
 

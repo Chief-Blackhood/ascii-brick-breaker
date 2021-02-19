@@ -16,15 +16,15 @@ def reposition_cursor():
     """
     print("\033[0;0H")
 
-def filler(el, height, width, return_matrix=False):
-    res = []
-    for _ in range(height):
-        res2 = []
-        for __ in range(width):
-            res2.append(el)
-        res.append(res2)
-    # have to understand the if condition
-    return res[0] if height == 1 and not return_matrix else res
+
+def format_number(time):
+    return f"{time if time > 9 else ('0'+f'{time}')}"
+
+
+def format_time(time_in_sec):
+    return f"{format_number(int((time_in_sec//3600)%24))}:{format_number(int((time_in_sec//60)%60))}:" \
+           f"{format_number(int(time_in_sec%60))} "
+
 
 def get_key_pressed(keyin):
     keyin = keyin.lower()
@@ -35,6 +35,7 @@ def get_key_pressed(keyin):
         return -1
 
     return keyin
+
 
 def clear_buffer():
     """Clears the input buffer"""

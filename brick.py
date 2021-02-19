@@ -8,6 +8,7 @@ class Brick(GenericObject):
     def __init__(self):
         super().__init__([4, 2], config.BACK_COLOR + "🟥")
         self._variety = 3
+        self._explode = -1
 
     @property
     def get_variety(self):
@@ -15,6 +16,13 @@ class Brick(GenericObject):
 
     def set_variety(self, value):
         self._variety = value
+
+    @property
+    def get_explode(self):
+        return self._explode
+
+    def set_explode(self, value):
+        self._explode = value
 
     @property
     def get_element(self):
@@ -26,3 +34,5 @@ class Brick(GenericObject):
             return config.BACK_COLOR + "🟥"
         if self._variety == 4:
             return config.BACK_COLOR + "⬛"
+        if self._variety == 5:
+            return config.BACK_COLOR + "🟨"
