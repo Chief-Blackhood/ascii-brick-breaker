@@ -80,6 +80,28 @@ class Game:
                     brick.set_y(10 + brick.get_shape[1] * row)
                     self.__bricks.append(brick)
 
+    def _deactivate_powerup(self, obj, i):
+        obj[0] = False
+        if i == 0 and not self.__active_powerup[1][0]:
+            self.__paddle.set_x(self.__paddle.get_x + 4)
+            self.__paddle.set_shape([11, 2])
+            self.__paddle.set_element(config.BACK_COLOR + "🧱")
+        elif i == 1 and not self.__active_powerup[0][0]:
+            if self.__paddle.get_x >= config.FRAME_WIDTH - self.__paddle.get_shape[0] * 2 - 3:
+                self.__paddle.set_x(self.__paddle.get_x - 8)
+            elif self.__paddle.get_x > 4:
+                self.__paddle.set_x(self.__paddle.get_x - 4)
+            self.__paddle.set_shape([11, 2])
+            self.__paddle.set_element(config.BACK_COLOR + "🧱")
+        elif i == 2:
+            config.FRAME_RATE = 20
+        elif i == 3:
+            self.__paddle.set_sticky(False)
+        elif i == 4:
+            for ball in self.__balls:
+                ball.set_through_ball(False)
+                ball.set_element(config.BACK_COLOR + "🌎")
+
     def _initialize_ball(self):
         if len(self.__balls) == 1:
             ball = self.__balls[0]
@@ -88,6 +110,8 @@ class Game:
                 ball.set_x(paddle.get_x + random.randint(0, 2 * floor(paddle.get_shape[0]) - 1))
                 ball.set_y(paddle.get_y - 1)
                 self.__lives -= 1
+                for i, obj in enumerate(self.__active_powerup):
+                    self._deactivate_powerup(obj, i)
         else:
             for ball in self.__balls:
                 if ball.get_velocity == [0, 0] and ball.get_y >= config.FRAME_HEIGHT - 1:
@@ -121,26 +145,7 @@ class Game:
             obj.set_y(obj.get_y + 0.5)
         for i, obj in enumerate(self.__active_powerup):
             if obj[0] and self._count - obj[1] > 300:
-                obj[0] = False
-                if i == 0 and not self.__active_powerup[1][0]:
-                    self.__paddle.set_x(self.__paddle.get_x + 4)
-                    self.__paddle.set_shape([11, 2])
-                    self.__paddle.set_element(config.BACK_COLOR + "🧱")
-                elif i == 1 and not self.__active_powerup[0][0]:
-                    if self.__paddle.get_x >= config.FRAME_WIDTH - self.__paddle.get_shape[0]*2 - 3:
-                        self.__paddle.set_x(self.__paddle.get_x - 8)
-                    elif self.__paddle.get_x > 4:
-                        self.__paddle.set_x(self.__paddle.get_x - 4)
-                    self.__paddle.set_shape([11, 2])
-                    self.__paddle.set_element(config.BACK_COLOR + "🧱")
-                elif i == 2:
-                    self.__ball.set_element(config.BACK_COLOR + "🌎")
-                    config.FRAME_RATE = 20
-                elif i == 3:
-                    self.__paddle.set_sticky(False)
-                elif i == 4:
-                    self.__ball.set_through_ball(False)
-                    self.__ball.set_element(config.BACK_COLOR + "🌎")
+                self._deactivate_powerup(obj, i)
 
     def _draw(self):
         self.__grid = np.array([[Fore.WHITE + config.BACK_COLOR + " "
@@ -150,7 +155,7 @@ class Game:
         self._draw_in_range(self.__paddle.draw(), self.__paddle.get_element)
         self._draw_bricks()
         for ball in self.__balls:
-            self._draw_in_range(ball.draw(), self.__ball.get_element)
+            self._draw_in_range(ball.draw(), ball.get_element)
         self._draw_powerups()
 
         sra = str(Style.RESET_ALL)
@@ -191,6 +196,7 @@ class Game:
         print("⏱ Time: ", self.__time)
         print("💓 Lives: ", self.__lives)
         print("Score: ", self.__score)
+        # print(len(self.__balls))
         # for obj in self.__bricks:
         #     print(obj.draw())
         # print(self.__paddle.draw())
@@ -200,8 +206,8 @@ class Game:
         # print(self._count)
         # print(x,y)
         # # print(self.__paddle.get_x, self.__paddle.get_y)
-        # for ball in self.__balls:
-        #     print(ball.draw())
+        for ball in self.__balls:
+            print(ball.draw())
         # print(self.__ball.get_velocity)
 
     def _loop(self):
@@ -251,7 +257,7 @@ class Game:
                         distance / self.__paddle.get_shape[0] * 2), ball.get_velocity[1]])
                 if self.__paddle.get_sticky:
                     if ball.get_velocity != [0, 0]:
-                        ball.set_temp_velocity(self.__ball.get_velocity)
+                        ball.set_temp_velocity(ball.get_velocity)
                     ball.set_velocity([0, 0])
 
     def _detect_brick_ball_collision(self):
@@ -283,7 +289,7 @@ class Game:
             x_previous = ball.get_x + (step - 1) * ball.get_velocity[0] / iterations + 0.5
             y_previous = ball.get_y - (step - 1) * ball.get_velocity[1] / iterations
 
-            if not self.__ball.get_through_ball:
+            if not ball.get_through_ball:
                 if brick_hit.get_x - 1 <= x_previous <= brick_hit.get_x + brick_hit.get_shape[0] * 2 + 1 \
                         and (y_previous < brick_hit.get_y or y_previous >= brick_hit.get_y + brick_hit.get_shape[1] - 1):
                     ball.set_x(floor(x_previous))
@@ -308,11 +314,11 @@ class Game:
                     ball.set_y(round(y_previous))
                     ball.set_x(round(x_previous))
 
-            if brick_hit.get_variety == 1 or self.__ball.get_through_ball:
+            if brick_hit.get_variety == 1 or brick_hit.get_variety == 5 or ball.get_through_ball:
                 del self.__bricks[index]
                 self.__score += 100
                 probability_of_powerup = random.random()
-                if probability_of_powerup >= 0.85:
+                if probability_of_powerup <= 0.40:
                     variety = random.randint(1, 6)
                     switcher = {
                         1: ExpandPaddle(),
@@ -327,7 +333,7 @@ class Game:
                     powerup.set_y(brick_hit.get_y)
                     self.__powerup_shown.append(powerup)
             else:
-                if brick_hit.get_variety != 4:
+                if brick_hit.get_variety != 4 and brick_hit.get_variety != 5:
                     brick_hit.set_variety(brick_hit.get_variety - 1)
 
     # def _detect_brick_ball_collision(self):

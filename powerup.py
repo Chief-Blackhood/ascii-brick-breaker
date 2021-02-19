@@ -7,7 +7,7 @@ class GenericPowerUp(GenericObject):
     TYPE = "power_up"
 
     def __init__(self):
-        super().__init__([2, 1], config.BACK_COLOR + "💪")
+        super().__init__([1, 1], config.BACK_COLOR + "💪")
         self._x = 0
         self._y = 0
         self._variety = 0
@@ -106,6 +106,8 @@ class BallMultiplier(GenericPowerUp):
                 new_ball.set_y(ball.get_y)
                 temp_balls.append(ball)
                 temp_balls.append(new_ball)
+            else:
+                temp_balls.append(ball)
 
         return temp_balls
 
