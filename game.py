@@ -18,26 +18,18 @@ from utils import clear_terminal_screen, reposition_cursor, get_key_pressed, cle
 
 class Game:
     brick_string = [
-        # "00000111111111100000",
-        # "00000111111111100000",
-        # "00000111111111100000",
-        # "00000111111111100000",
-        # "00000111111111100000",
-        # "00000133333333100000",
-        # "00000111110111100000",
-        # "00000111110111100000",
-        # "00000111110111100000",
-        # "00000111110111100000",
-        # "00000111110111100000",
-        "00020211111111202000",
-        "00010111111111101000",
-        "00020111111111102000",
-        "00010121111112101000",
-        "00010113333331101000",
-        "00020121100112102000",
-        "00010211100111201000",
-        "00010000000000001000",
-        "00021112100121112000",
+        "00000333333333000000",
+        "00000111133111000000",
+        "00000000033000000000",
+        "02320211133111202320",
+        "01310111133111101310",
+        "02320111133111102320",
+        "01310121111112101310",
+        "01310113333331101310",
+        "02320121100112102320",
+        "01310211100111201310",
+        "01310000000000001310",
+        "01121112100121112110",
     ]
     _refresh_time = 1 / FRAME_RATE
 
@@ -63,6 +55,7 @@ class Game:
         clear_terminal_screen()
         self.__bricks = []
         self.__power_up_shown = []
+        self.__unbreakable_bricks = 0
         self.__lives = 8
         self.__score = 0
         self.__time = 0
@@ -77,12 +70,13 @@ class Game:
                     brick = Brick()
                     if self.brick_string[row][col] == '2':
                         brick.set_variety(4)
+                        self.__unbreakable_bricks += 1
                     elif self.brick_string[row][col] == '3':
                         brick.set_variety(5)
                     else:
                         brick.set_variety(random.randint(1, 3))
                     brick.set_x(5 + 2 * brick.get_shape[0] * col)
-                    brick.set_y(10 + brick.get_shape[1] * row)
+                    brick.set_y(0 + brick.get_shape[1] * row)
                     self.__bricks.append(brick)
 
     def explode_each_brick(self, brick_hit):
@@ -96,6 +90,8 @@ class Game:
                     if nearby.get_variety == 5:
                         nearby.set_explode(self._count + 1)
                     else:
+                        if nearby.get_variety == 4:
+                            self.__unbreakable_bricks -= 1
                         to_remove.append(nearby)
                         self._drop_power_up(nearby)
         self.__bricks = [x for x in self.__bricks if x not in to_remove]
@@ -194,6 +190,7 @@ class Game:
     def _terminate(self):
         self.__game_status = -1
         os.system('setterm -cursor on')
+        print("Bye 👋")
 
     def _handle_input(self):
         inputted = ""
@@ -203,13 +200,13 @@ class Game:
 
         cin = get_key_pressed(inputted)
         if cin == -1:
-            self._terminate(-1)
+            self._terminate()
         elif cin == 'a':
             for ball in self.__balls:
-                self.__paddle.update_paddle(-2, ball)
+                self.__paddle.update_paddle(-3, ball)
         elif cin == 'd':
             for ball in self.__balls:
-                self.__paddle.update_paddle(2, ball)
+                self.__paddle.update_paddle(3, ball)
         elif cin == ' ':
             for ball in self.__balls:
                 ball.give_velocity(self.__paddle.get_sticky)
@@ -218,18 +215,21 @@ class Game:
         return cin
 
     def _info_print(self):
-        pass
         print("⏱ Time: ", format_time(self.__time), (config.FRAME_WIDTH - 39) * " ", "💓 Lives: ", self.__lives)
-        print("🌟 Score: ", self.__score, (config.FRAME_WIDTH - 33) * " ", "🧱 Bricks:", len(self.__bricks))
-        # print(len(self.__balls))
-        # print(self.__paddle.draw())
-        # info = self.__ball.draw()
-        # x = int(floor(info["coord"][1])) if info["velocity"][0] > 0 else int(ceil(info["coord"][1]))
-        # y = int(floor(info["coord"][0])) if info["velocity"][1] < 0 else int(ceil(info["coord"][0]))
-        # print(self._count)
-        # print(x,y)
-        # # print(self.__paddle.get_x, self.__paddle.get_y)
-        # print(self.__ball.get_velocity)
+        print("🌟 Score: ", self.__score, (config.FRAME_WIDTH - 32 - len(str(self.__score))) * " ", "🧱 Bricks:",
+              len(self.__bricks) - self.__unbreakable_bricks)
+
+    def _game_status_check(self):
+        if self.__lives <= 0:
+            self.__game_status = -1
+            os.system('setterm -cursor on')
+            print("Game over 😕")
+            self._info_print()
+        elif self.__unbreakable_bricks == len(self.__bricks):
+            self.__game_status = -1
+            os.system('setterm -cursor on')
+            print("You won 🎉")
+            self._info_print()
 
     def _loop(self):
         self.__game_status = 1
@@ -238,6 +238,8 @@ class Game:
         clear_terminal_screen()
 
         while self.__game_status == 1:
+            if self._count % 200 == 0:
+                clear_terminal_screen()
             frames_looped += 1
             if frames_looped >= config.FRAME_RATE:
                 frames_looped = 0
@@ -256,6 +258,7 @@ class Game:
 
             last_time = time.perf_counter()
             self._handle_input()
+            self._game_status_check()
 
             while time.perf_counter() - last_time < self._refresh_time:
                 pass
@@ -282,7 +285,7 @@ class Game:
     def _drop_power_up(self, brick_hit):
         self.__score += 100
         probability_of_power_up = random.random()
-        if probability_of_power_up <= 0.10:
+        if probability_of_power_up <= 0.15:
             variety = random.randint(1, 6)
             switcher = {
                 1: ExpandPaddle(),
@@ -359,6 +362,8 @@ class Game:
                 self.__bricks.remove(brick_hit)
                 self.__score += 100
             elif brick_hit.get_variety == 1 or ball.get_through_ball:
+                if brick_hit.get_variety == 4:
+                    self.__unbreakable_bricks -= 1
                 del self.__bricks[index]
                 self._drop_power_up(brick_hit)
             else:
