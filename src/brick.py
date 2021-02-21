@@ -1,5 +1,5 @@
 import config
-from generic import GenericObject
+from src.generic import GenericObject
 
 
 class Brick(GenericObject):

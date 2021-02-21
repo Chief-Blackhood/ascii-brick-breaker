@@ -7,12 +7,12 @@ import numpy as np
 from colorama import init as coloramaInit, Fore, Style
 
 import config
-from ball import Ball
+from src.ball import Ball
 from brick import Brick
 from config import FRAME_RATE
-from kbhit import KBHit
-from paddle import Paddle
-from powerup import ShrinkPaddle, ExpandPaddle, SpeedUpBall, StickyPaddle, ThroughBall, BallMultiplier
+from src.kbhit import KBHit
+from src.paddle import Paddle
+from src.powerup import ShrinkPaddle, ExpandPaddle, SpeedUpBall, StickyPaddle, ThroughBall, BallMultiplier
 from utils import clear_terminal_screen, reposition_cursor, get_key_pressed, clear_buffer, format_time
 
 

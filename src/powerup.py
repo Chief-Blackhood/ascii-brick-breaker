@@ -1,5 +1,5 @@
 import config
-from ball import Ball
+from src.ball import Ball
 from generic import GenericObject
 
 
