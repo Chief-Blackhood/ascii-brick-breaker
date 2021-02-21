@@ -7,12 +7,12 @@ import numpy as np
 from colorama import init as coloramaInit, Fore, Style
 
 import config
-from src.ball import Ball
+from ball import Ball
 from brick import Brick
 from config import FRAME_RATE
-from src.kbhit import KBHit
-from src.paddle import Paddle
-from src.powerup import ShrinkPaddle, ExpandPaddle, SpeedUpBall, StickyPaddle, ThroughBall, BallMultiplier
+from kbhit import KBHit
+from paddle import Paddle
+from powerup import ShrinkPaddle, ExpandPaddle, SpeedUpBall, StickyPaddle, ThroughBall, BallMultiplier
 from utils import clear_terminal_screen, reposition_cursor, get_key_pressed, clear_buffer, format_time
 
 
@@ -56,7 +56,7 @@ class Game:
         self.__bricks = []
         self.__power_up_shown = []
         self.__unbreakable_bricks = 0
-        self.__lives = 8
+        self.__lives = config.LIVES + 1
         self.__score = 0
         self.__time = 0
         self.__active_power_up = [[False, 0] for _ in range(6)]
@@ -76,7 +76,7 @@ class Game:
                     else:
                         brick.set_variety(random.randint(1, 3))
                     brick.set_x(5 + 2 * brick.get_shape[0] * col)
-                    brick.set_y(0 + brick.get_shape[1] * row)
+                    brick.set_y(2 + brick.get_shape[1] * row)
                     self.__bricks.append(brick)
 
     def explode_each_brick(self, brick_hit):
@@ -157,7 +157,7 @@ class Game:
                         for ball in self.__balls:
                             obj.activate_power_up(ball)
                     elif obj.get_variety == 6:
-                        if len(self.__balls) <= 10:
+                        if len(self.__balls) < 4:
                             self.__balls = obj.activate_power_up(self.__balls)
 
                 self.__power_up_shown.remove(obj)
@@ -166,7 +166,7 @@ class Game:
         for obj in self.__power_up_shown:
             obj.set_y(obj.get_y + 0.5)
         for i, obj in enumerate(self.__active_power_up):
-            if obj[0] and self._count - obj[1] > 300:
+            if obj[0] and self._count - obj[1] > config.POWER_UP_ACTIVE_TIME:
                 self._deactivate_power_up(obj, i)
 
     def _draw(self):
@@ -203,10 +203,10 @@ class Game:
             self._terminate()
         elif cin == 'a':
             for ball in self.__balls:
-                self.__paddle.update_paddle(-3, ball)
+                self.__paddle.update_paddle(-config.PADDLE_SPEED, ball)
         elif cin == 'd':
             for ball in self.__balls:
-                self.__paddle.update_paddle(3, ball)
+                self.__paddle.update_paddle(config.PADDLE_SPEED, ball)
         elif cin == ' ':
             for ball in self.__balls:
                 ball.give_velocity(self.__paddle.get_sticky)
@@ -259,7 +259,6 @@ class Game:
             last_time = time.perf_counter()
             self._handle_input()
             self._game_status_check()
-
             while time.perf_counter() - last_time < self._refresh_time:
                 pass
 
@@ -285,7 +284,7 @@ class Game:
     def _drop_power_up(self, brick_hit):
         self.__score += 100
         probability_of_power_up = random.random()
-        if probability_of_power_up <= 0.15:
+        if probability_of_power_up <= config.POWER_UP_DROP_PROBABILITY:
             variety = random.randint(1, 6)
             switcher = {
                 1: ExpandPaddle(),
@@ -302,7 +301,7 @@ class Game:
 
     def _detect_brick_ball_collision(self):
         for ball in self.__balls:
-            iterations = 10
+            iterations = 20
             brick_hit = None
             step = 0
             index = -1

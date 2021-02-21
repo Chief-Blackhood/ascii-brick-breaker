@@ -1,5 +1,5 @@
 import config
-from src.ball import Ball
+from ball import Ball
 from generic import GenericObject
 
 
@@ -104,6 +104,7 @@ class BallMultiplier(GenericPowerUp):
                 new_ball.set_velocity([-velocity[0], -velocity[1]])
                 new_ball.set_x(ball.get_x)
                 new_ball.set_y(ball.get_y)
+                new_ball.set_through_ball(ball.get_through_ball)
                 temp_balls.append(ball)
                 temp_balls.append(new_ball)
             else:
