@@ -17,6 +17,7 @@ from utils import clear_terminal_screen, reposition_cursor, get_key_pressed, cle
 
 
 class Game:
+    """Shape of the level"""
     brick_string = [
         "00000333333333000000",
         "00000111133111000000",
@@ -34,6 +35,7 @@ class Game:
     _refresh_time = 1 / FRAME_RATE
 
     def _draw_in_range(self, info, obj):
+        """Common function to draw any object in the given position and shape"""
         row = round(info["size"][1])
         col = round(info["size"][0])
         x = int(round(info["coord"][1]))
@@ -64,6 +66,7 @@ class Game:
         self._loop()
 
     def _initialize_bricks(self):
+        """To set the position and type of each brick at the start of the game"""
         for row in range(len(self.brick_string)):
             for col in range(len(self.brick_string[0])):
                 if self.brick_string[row][col] != '0':
@@ -80,6 +83,9 @@ class Game:
                     self.__bricks.append(brick)
 
     def explode_each_brick(self, brick_hit):
+        """
+        To remove each brick surrounding an explosive brick or set a timer on it if it is an explosive brick itself
+        """
         to_remove = []
         for nearby in self.__bricks:
             if brick_hit.get_x - brick_hit.get_shape[0] * 2 <= nearby.get_x <= brick_hit.get_x + \
@@ -97,12 +103,14 @@ class Game:
         self.__bricks = [x for x in self.__bricks if x not in to_remove]
 
     def _explode_bricks(self):
+        """To loop on all explosive bricks"""
         for brick in self.__bricks:
             if brick.get_variety == 5 and brick.get_explode == self._count:
                 self.explode_each_brick(brick)
                 self.__bricks.remove(brick)
 
     def _deactivate_power_up(self, obj, i):
+        """To deactivate power up and make the properties of the paddle and the ball normal"""
         obj[0] = False
         if i == 0 and not self.__active_power_up[1][0]:
             self.__paddle.set_x(self.__paddle.get_x + 4)
@@ -125,6 +133,7 @@ class Game:
                 ball.set_element(config.BACK_COLOR + "🌎")
 
     def _initialize_ball(self):
+        """To reset the position of the ball after every death"""
         if len(self.__balls) == 1:
             ball = self.__balls[0]
             paddle = self.__paddle
@@ -140,10 +149,12 @@ class Game:
                     self.__balls.remove(ball)
 
     def _draw_bricks(self):
+        """To draw bricks on the screen"""
         for obj in self.__bricks:
             self._draw_in_range(obj.draw(), obj.get_element)
 
     def _draw_power_ups(self):
+        """To draw power up and call the activate function if touched by the paddle"""
         for obj in self.__power_up_shown:
             if obj.get_y < config.FRAME_HEIGHT - 2:
                 self._draw_in_range(obj.draw(), obj.get_element)
@@ -163,6 +174,7 @@ class Game:
                 self.__power_up_shown.remove(obj)
 
     def _update_power_ups(self):
+        """To update the position of the power up or deactivate the power up whose time is up"""
         for obj in self.__power_up_shown:
             obj.set_y(obj.get_y + 0.5)
         for i, obj in enumerate(self.__active_power_up):
@@ -170,6 +182,7 @@ class Game:
                 self._deactivate_power_up(obj, i)
 
     def _draw(self):
+        """To draw all the objects on the screen"""
         self.__grid = np.array([[Fore.WHITE + config.BACK_COLOR + " "
                                  for _ in range(config.FRAME_WIDTH)]
                                 for _ in range(config.FRAME_HEIGHT)])
@@ -188,11 +201,13 @@ class Game:
         os.write(1, str.encode(grid_str))
 
     def _terminate(self):
+        """To terminate if key "q" is pressed"""
         self.__game_status = -1
         os.system('setterm -cursor on')
         print("Bye 👋")
 
     def _handle_input(self):
+        """To handle input from the user"""
         inputted = ""
 
         if self.__keys.kbhit():
@@ -215,11 +230,13 @@ class Game:
         return cin
 
     def _info_print(self):
+        """Print the status of the game"""
         print("⏱ Time: ", format_time(self.__time), (config.FRAME_WIDTH - 39) * " ", "💓 Lives: ", self.__lives)
         print("🌟 Score: ", self.__score, (config.FRAME_WIDTH - 32 - len(str(self.__score))) * " ", "🧱 Bricks:",
               len(self.__bricks) - self.__unbreakable_bricks)
 
     def _game_status_check(self):
+        """Check the condition of whether the player won or not"""
         if self.__lives <= 0:
             self.__game_status = -1
             os.system('setterm -cursor on')
@@ -232,6 +249,7 @@ class Game:
             self._info_print()
 
     def _loop(self):
+        """The main loop where each function is called"""
         self.__game_status = 1
         frames_looped = 0
 
@@ -267,6 +285,7 @@ class Game:
         return self.__grid
 
     def _detect_ball_paddle_collision(self):
+        """To detect ball paddle collision"""
         for ball in self.__balls:
             if self.__paddle.get_x - 1 <= ball.get_x <= self.__paddle.get_x + self.__paddle.get_shape[0] * 2 \
                     and ball.get_y == self.__paddle.get_y - 1:
@@ -282,6 +301,7 @@ class Game:
                     ball.set_velocity([0, 0])
 
     def _drop_power_up(self, brick_hit):
+        """To decide if a power up spawns at the place where the brick was broken"""
         self.__score += 100
         probability_of_power_up = random.random()
         if probability_of_power_up <= config.POWER_UP_DROP_PROBABILITY:
@@ -300,6 +320,7 @@ class Game:
             self.__power_up_shown.append(power_up)
 
     def _detect_brick_ball_collision(self):
+        """To detect collision between ball and bricks"""
         for ball in self.__balls:
             iterations = 20
             brick_hit = None

@@ -17,12 +17,15 @@ class Paddle(GenericObject):
 
     @property
     def get_sticky(self):
+        """getter"""
         return self._sticky
 
     def set_sticky(self, value):
+        """setter"""
         self._sticky = value
 
     def update_paddle(self, value, ball):
+        """To update the position of the paddle and the ball which is on it"""
         obj = self
         if config.FRAME_WIDTH - 2*obj.get_shape[0] >= obj.get_x + value >= 0:
             obj.set_x(obj.get_x + value)

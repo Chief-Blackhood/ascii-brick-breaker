@@ -24,28 +24,36 @@ class GenericObject:
 
     @property
     def get_element(self):
+        """getter"""
         return self._element
 
     @property
     def get_x(self):
+        """getter"""
         return self._x
 
     @property
     def get_y(self):
+        """getter"""
         return self._y
 
     def set_x(self, value):
+        """setter"""
         self._x = value
 
     def set_y(self, value):
+        """setter"""
         self._y = value
 
     @property
     def get_shape(self):
+        """getter"""
         return self._shape
 
     def set_shape(self, value):
+        """setter"""
         self._shape = value
 
     def set_element(self, value):
+        """setter"""
         self._element = value

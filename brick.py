@@ -12,20 +12,25 @@ class Brick(GenericObject):
 
     @property
     def get_variety(self):
+        """getter"""
         return self._variety
 
     def set_variety(self, value):
+        """setter"""
         self._variety = value
 
     @property
     def get_explode(self):
+        """getter"""
         return self._explode
 
     def set_explode(self, value):
+        """setter"""
         self._explode = value
 
     @property
     def get_element(self):
+        """getter"""
         if self._variety == 1:
             return config.BACK_COLOR + "🟩"
         if self._variety == 2:

@@ -17,85 +17,103 @@ class GenericPowerUp(GenericObject):
 
     @property
     def get_variety(self):
+        """getter"""
         return self._variety
 
 
 class ExpandPaddle(GenericPowerUp):
+    """power up to expand paddle"""
     def __init__(self):
         super().__init__()
         self._variety = 1
 
     def activate_power_up(self, obj):
+        """To update the size and emoji of the paddle"""
         obj.set_x(obj.get_x - 4)
         obj.set_shape([15, 2])
         obj.set_element(config.BACK_COLOR + "🌀")
 
     @property
     def get_element(self):
+        """getter Overridden"""
         return config.BACK_COLOR + "💪"
 
 
 class ShrinkPaddle(GenericPowerUp):
+    """Power up to shrink the paddle"""
     def __init__(self):
         super().__init__()
         self._variety = 2
 
     def activate_power_up(self, obj):
+        """To update the size and emoji of the paddle"""
         obj.set_x(obj.get_x + 4)
         obj.set_shape([7, 2])
         obj.set_element(config.BACK_COLOR + "💀")
 
     @property
     def get_element(self):
+        """getter Overridden"""
         return config.BACK_COLOR + "🍼"
 
 
 class SpeedUpBall(GenericPowerUp):
+    """To increase the speed of the ball"""
     def __init__(self):
         super().__init__()
         self._variety = 3
 
     def activate_power_up(self, obj):
+        """To update the frame rate so as to give a sense of speed increment"""
         config.FRAME_RATE = min(25, config.FRAME_RATE + 5)
 
     @property
     def get_element(self):
+        """getter Overridden"""
         return config.BACK_COLOR + "🌠"
 
 
 class StickyPaddle(GenericPowerUp):
+    """Power up so that ball sticks to the paddle"""
     def __init__(self):
         super().__init__()
         self._variety = 4
 
     def activate_power_up(self, obj):
+        """To make the paddle sticky"""
         obj.set_sticky(True)
 
     @property
     def get_element(self):
+        """getter Overridden"""
         return config.BACK_COLOR + "🍭"
 
 
 class ThroughBall(GenericPowerUp):
+    """Power up that makes the ball got through everything"""
     def __init__(self):
         super().__init__()
         self._variety = 5
 
     def activate_power_up(self, obj):
+        """Change the emoji and attribute of the ball"""
         obj.set_through_ball(True)
         obj.set_element(config.BACK_COLOR + "🔥")
 
     @property
     def get_element(self):
+        """getter Overridden"""
         return config.BACK_COLOR + "🧿"
 
 
 class BallMultiplier(GenericPowerUp):
+    """To multiply the balls present on the screen by two"""
     def __init__(self):
         super().__init__()
         self._variety = 6
 
     def activate_power_up(self, obj):
+        """To iterate over all the present balls and make copies of them with velocity in the opposite direction"""
         temp_balls = []
         for ball in obj:
             if ball.get_velocity != [0, 0]:
@@ -114,4 +132,5 @@ class BallMultiplier(GenericPowerUp):
 
     @property
     def get_element(self):
+        """getter Overridden"""
         return config.BACK_COLOR + "🍒"

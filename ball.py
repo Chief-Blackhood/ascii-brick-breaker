@@ -15,34 +15,43 @@ class Ball(GenericObject):
 
     @property
     def get_velocity(self):
+        """getter"""
         return self._velocity
 
     @property
     def get_temp_velocity(self):
+        """getter"""
         return self._temp_velocity
 
     @property
     def get_through_ball(self):
+        """getter"""
         return self._through_ball
 
     def set_velocity(self, value):
+        """setter"""
         self._velocity = value
 
     def set_temp_velocity(self, value):
+        """setter"""
         self._temp_velocity = value
 
     def set_through_ball(self, value):
+        """setter"""
         self._through_ball = value
 
     @property
     def get_x(self):
+        """getter"""
         return self._x
 
     @property
     def get_y(self):
+        """getter"""
         return self._y
 
     def update_ball(self):
+        """update position of the ball and keep it inside the walls"""
         ball = self
         velocity = ball.get_velocity
         ball._x = ball.get_x + velocity[0]
@@ -64,6 +73,7 @@ class Ball(GenericObject):
             velocity[0] = velocity[1] = 0
 
     def give_velocity(self, sticky):
+        """give velocity to the ball after released from the paddle"""
         if sticky and self._temp_velocity != [0, 0]:
             self._velocity = self._temp_velocity
         elif self._velocity == [0, 0]:

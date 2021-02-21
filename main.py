@@ -1,3 +1,7 @@
+"""
+The point of entry of the game.
+"""
+
 import os
 import signal
 from game import Game
