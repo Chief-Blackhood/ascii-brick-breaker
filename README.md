@@ -4,7 +4,6 @@ The player will be using a paddle with a bouncing ball to smash a
 wall of bricks and make high scores! The objective of the game is to break all the bricks as fast as possible and
 beat the highest score! You lose a life and all the powerups gained when the ball touches the ground below the paddle.
 
-
 ## Setup
 
 ---
@@ -12,7 +11,7 @@ beat the highest score! You lose a life and all the powerups gained when the bal
 Ensure that you have python3.6+ and pip installed.
 
 ```(shell)
-pip install -r requirements.txt
+pip3 install -r requirements.txt
 ```
 
 Run the following to play the game
@@ -20,8 +19,11 @@ Run the following to play the game
 ```(shell)
 python3 main.py
 ```
+
 ## How to play?
+
 ---
+
 ### Controls
 
 - <kbd>A</kbd>: To move the paddle left
@@ -29,7 +31,7 @@ python3 main.py
 - <kbd>SPACE</kbd>: To release the ball from the paddle
 - <kbd>a</kbd>: To quit game
 
-*Note: The controls are force-based. No need to press them continuously to achieve motion.
+\*Note: The controls are force-based. No need to press them continuously to achieve motion.
 
 ### Gameplay
 
@@ -47,7 +49,7 @@ Here's a list of instances of the OOPS concepts in use:
 
 ### Inheritance
 
-The `ball`, `brick`, `paddle`, `GenericPowerUp`,  classes inherit from `generic` class.
+The `ball`, `brick`, `paddle`, `GenericPowerUp`, classes inherit from `generic` class.
 
 ### Polymorphism
 
