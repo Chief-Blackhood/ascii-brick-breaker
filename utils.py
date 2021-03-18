@@ -28,7 +28,7 @@ def get_key_pressed(keyin):
     """To detect the key pressed"""
     keyin = keyin.lower()
 
-    if keyin not in ('q', 'a', 'd', ' '):
+    if keyin not in ('q', 'a', 'd', ' ', 'l'):
         return 0
     if keyin == 'q':
         return -1

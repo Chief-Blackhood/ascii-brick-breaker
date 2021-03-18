@@ -134,3 +134,13 @@ class BallMultiplier(GenericPowerUp):
     def get_element(self):
         """getter Overridden"""
         return config.BACK_COLOR + "🍒"
+
+class ShootingPaddle(GenericPowerUp):
+    def __init__(self):
+        super().__init__()
+        self._variety = 7
+
+    @property
+    def get_element(self):
+        """getter Overridden"""
+        return config.BACK_COLOR + "🥢"

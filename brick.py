@@ -9,6 +9,7 @@ class Brick(GenericObject):
         super().__init__([4, 2], config.BACK_COLOR + "🟥")
         self._variety = 3
         self._explode = -1
+        self._rainbow = False
 
     @property
     def get_variety(self):
@@ -27,6 +28,15 @@ class Brick(GenericObject):
     def set_explode(self, value):
         """setter"""
         self._explode = value
+
+    @property
+    def get_rainbow(self):
+        """getter"""
+        return self._rainbow
+
+    def set_rainbow(self, value):
+        """setter"""
+        self._rainbow = value
 
     @property
     def get_element(self):

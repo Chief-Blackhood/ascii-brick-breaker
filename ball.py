@@ -77,4 +77,4 @@ class Ball(GenericObject):
         if sticky and self._temp_velocity != [0, 0]:
             self._velocity = self._temp_velocity
         elif self._velocity == [0, 0]:
-            self._velocity = [1, 1]
+            self._velocity = [0, 1]
