@@ -2,7 +2,7 @@
 
 The player will be using a paddle with a bouncing ball to smash a
 wall of bricks and make high scores! The objective of the game is to break all the bricks as fast as possible and
-beat the highest score! You lose a life and all the powerups gained when the ball touches the ground below the paddle.
+beat the highest score! You lose a life and all the power ups gained when the ball touches the ground below the paddle.
 
 ## Setup
 
@@ -29,15 +29,17 @@ python3 main.py
 - <kbd>A</kbd>: To move the paddle left
 - <kbd>D</kbd>: To move the paddle right
 - <kbd>SPACE</kbd>: To release the ball from the paddle
-- <kbd>a</kbd>: To quit game
+- <kbd>L</kbd>: To skip a level
+- <kbd>H</kbd>: To reduce boss health
+- <kbd>Q</kbd>: To quit game
 
 \*Note: The controls are force-based. No need to press them continuously to achieve motion.
 
 ### Gameplay
 
-Collect powerups, and destroy bricks to increase your score. But beware of some powerup as they might increase the ball speed or shrink your paddle!
+Collect power ups, and destroy bricks to increase your score. But beware of some power up as they might increase the ball speed or shrink your paddle!
 
-Press <kbd>A</kbd> and <kbd>D</kbd> for movement and try to save the ball from falling into the abyss. Also press <kbd>space</kbd> to release a new ball or when `sticky paddle` powerup is active at whichever position you like.
+Press <kbd>A</kbd> and <kbd>D</kbd> for movement and try to save the ball from falling into the abyss. Also press <kbd>space</kbd> to release a new ball or when `sticky paddle` power up is active at whichever position you like.
 
 Score the highest points by breaking all the bricks (even the unbreakable ones!)
 
@@ -49,11 +51,11 @@ Here's a list of instances of the OOPS concepts in use:
 
 ### Inheritance
 
-The `ball`, `brick`, `paddle`, `GenericPowerUp`, classes inherit from `generic` class.
+The `ball`, `brick`, `paddle`, `GenericPowerUp`, `Boss`, `Bomb`, classes inherit from `generic` class.
 
 ### Polymorphism
 
-The `activate_power_up()` method defined in `GenericPowerUp` class has been overridden in the different classes `ExpandPaddle`, `ShrinkPaddle`, `SpeedUpBall`, `StickyPaddle`, `ThroughBall`, `BallMultiplier`. This example of method overriding represents polymorphism.
+The `activate_power_up()` method defined in `GenericPowerUp` class has been overridden in the different classes `ExpandPaddle`, `ShrinkPaddle`, `SpeedUpBall`, `StickyPaddle`, `ThroughBall`, `BallMultiplier`, `ShootingPaddle`. This example of method overriding represents polymorphism.
 
 ### Encapsulation
 

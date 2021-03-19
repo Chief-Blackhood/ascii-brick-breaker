@@ -10,10 +10,44 @@ class GenericPowerUp(GenericObject):
         super().__init__([1, 1], config.BACK_COLOR + "💪")
         self._x = 0
         self._y = 0
+        self._velocity = [0, -0.5]
         self._variety = 0
+
+    @property
+    def get_velocity(self):
+        """getter"""
+        return self._velocity
+
+    def set_velocity(self, value):
+        """setter"""
+        self._velocity = value
 
     def activate_power_up(self, obj):
         pass
+
+    def update_velocity_y(self):
+        self.set_velocity([self.get_velocity[0], self.get_velocity[1] - 0.03])
+
+    def update_power_up(self):
+        power_up = self
+        velocity = power_up.get_velocity
+        power_up._x = power_up.get_x + velocity[0]
+        power_up._y = power_up.get_y - velocity[1]
+
+        if power_up.get_x <= 0:
+            power_up._x = 0
+            velocity[0] = -velocity[0]
+
+        if power_up.get_x >= config.FRAME_WIDTH - 1:
+            power_up._x = config.FRAME_WIDTH - 2
+            velocity[0] = -velocity[0]
+
+        if power_up.get_y <= 0:
+            power_up._y = 0
+            velocity[1] = -velocity[1]
+
+        if power_up.get_y >= config.FRAME_HEIGHT - 1:
+            velocity[0] = velocity[1] = 0
 
     @property
     def get_variety(self):
@@ -134,6 +168,7 @@ class BallMultiplier(GenericPowerUp):
     def get_element(self):
         """getter Overridden"""
         return config.BACK_COLOR + "🍒"
+
 
 class ShootingPaddle(GenericPowerUp):
     def __init__(self):

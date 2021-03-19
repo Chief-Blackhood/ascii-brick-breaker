@@ -121,6 +121,8 @@ class Game:
         self.__score = 0
         self.__time = 0
         self.__level = 1
+        self.__first_layer = False
+        self.__second_layer = False
         self.__drop_bomb = True
         self.__time_attack = 0
         self.__active_power_up = [[False, 0] for _ in range(7)]
@@ -141,7 +143,7 @@ class Game:
                     else:
                         boss.set_variety(1)
                     boss.set_x(70 + 2 * boss.get_shape[0] * col)
-                    boss.set_y(2 + boss.get_shape[1] * row)
+                    boss.set_y(boss.get_shape[1] * row)
                     self.__boss.append(boss)
 
     def _initialize_bricks(self, brick_string):
@@ -185,7 +187,7 @@ class Game:
                         if nearby.get_variety == 4:
                             self.__unbreakable_bricks -= 1
                         to_remove.append(nearby)
-                        self._drop_power_up(nearby)
+                        self._drop_power_up(nearby, [random.randint(-1, 1), random.randint(0, 1)])
         self.__bricks = [x for x in self.__bricks if x not in to_remove]
 
     def _explode_bricks(self):
@@ -269,7 +271,8 @@ class Game:
     def _update_power_ups(self):
         """To update the position of the power up or deactivate the power up whose time is up"""
         for obj in self.__power_up_shown:
-            obj.set_y(obj.get_y + 0.5)
+            obj.update_velocity_y()
+            obj.update_power_up()
         for i, obj in enumerate(self.__active_power_up):
             if obj[0] and self._count - obj[1] > config.POWER_UP_ACTIVE_TIME:
                 self._deactivate_power_up(obj, i)
@@ -316,6 +319,7 @@ class Game:
     def _terminate(self):
         """To terminate if key "q" is pressed"""
         self.__game_status = -1
+        self._info_print()
         os.system('setterm -cursor on')
         print("Bye 👋")
 
@@ -362,12 +366,17 @@ class Game:
                 self._update_level()
             else:
                 self._game_over()
+        elif cin == 'h':
+            if self.__level == 3:
+                self.__boss_health -= 10
 
         clear_buffer()
         return cin
 
     def _info_print(self):
         """Print the status of the game"""
+        if self.__level != 1:
+            print(config.FRAME_WIDTH * " ")
         print("⏱ Time: ", format_time(self.__time), (config.FRAME_WIDTH - 39) * " ", "💓 Lives: ", self.__lives,
               "      ")
         print("🌟 Score: ", self.__score, (config.FRAME_WIDTH - 32 - len(str(self.__score))) * " ", "🧱 Bricks:",
@@ -376,6 +385,10 @@ class Game:
             print("💈 Time:",
                   (config.POWER_UP_ACTIVE_TIME - self._count + self.__active_power_up[6][1]) // config.FRAME_RATE,
                   (config.FRAME_WIDTH - 9 - len(str(self.__score))) * " ")
+        if self.__level == 3:
+            print("Boss Health:",
+                  self.__boss_health,
+                  (config.FRAME_WIDTH - 16 - len(str(self.__score))) * " ")
 
     def _update_level(self):
         self.__level += 1
@@ -389,6 +402,7 @@ class Game:
         for i, power_up in enumerate(self.__active_power_up):
             self._deactivate_power_up(power_up, i)
         clear_terminal_screen()
+        self._info_print()
         self.__paddle.set_x(round(config.FRAME_WIDTH / 2 - round(self.__paddle.get_shape[0] / 2)) - 2)
         self._initialize_bricks(self.brick_strings[self.__level - 1])
         new_ball = Ball()
@@ -402,7 +416,7 @@ class Game:
     def _game_over(self):
         self.__game_status = -1
         os.system('setterm -cursor on')
-        print("Game over 😕")
+        print("Game over 😕", " " * (config.FRAME_WIDTH - 14))
         self._info_print()
 
     def _game_status_check(self):
@@ -412,11 +426,11 @@ class Game:
         elif self.__unbreakable_bricks == len(self.__bricks):
             if self.__level < 3:
                 self._update_level()
-            elif self.__level == 3 and self.__boss_health == 0:
-                self.__game_status = -1
-                os.system('setterm -cursor on')
-                print("You won 🎉")
-                self._info_print()
+        elif self.__level == 3 and self.__boss_health <= 0:
+            self.__game_status = -1
+            os.system('setterm -cursor on')
+            print("You won 🎉")
+            self._info_print()
 
     def _loop(self):
         """The main loop where each function is called"""
@@ -426,7 +440,7 @@ class Game:
         clear_terminal_screen()
 
         while self.__game_status == 1:
-            if self._count % 100 == 0:
+            if self._count % 200 == 0:
                 clear_terminal_screen()
             frames_looped += 1
             if frames_looped >= config.FRAME_RATE:
@@ -436,7 +450,7 @@ class Game:
                 if self.__level == 3:
                     if self.__drop_bomb:
                         bomb = Bomb()
-                        bomb.set_x(self.__paddle.get_x + self.__paddle.get_shape[0]-1)
+                        bomb.set_x(self.__paddle.get_x + self.__paddle.get_shape[0] - 1)
                         bomb.set_y(11)
                         self.__bombs.append(bomb)
                         self.__drop_bomb = False
@@ -459,6 +473,23 @@ class Game:
             self._detect_bullet_brick_collision()
             if self.__level == 3:
                 self._detect_ufo_ball_collision()
+                if self.__boss_health == 70 and not self.__first_layer:
+                    for i in range(13):
+                        brick = Brick()
+                        brick.set_y(18)
+                        brick.set_x(i * brick.get_shape[0] * 2 + 29)
+                        brick.set_variety(1 if i % 2 == 0 else 2)
+                        self.__bricks.append(brick)
+                    self.__first_layer = True
+
+                if self.__boss_health == 30 and not self.__second_layer:
+                    for i in range(15):
+                        brick = Brick()
+                        brick.set_y(20)
+                        brick.set_x(i * brick.get_shape[0] * 2 + 21)
+                        brick.set_variety(1 if i % 2 == 0 else 2)
+                        self.__bricks.append(brick)
+                    self.__second_layer = True
             for ball in self.__balls:
                 ball.update_ball()
             for bullet in self.__bullets:
@@ -469,11 +500,11 @@ class Game:
             self._initialize_ball()
             self._detect_ball_paddle_collision()
             self._detect_bomb_paddle_collision()
+            self._brick_paddle_collision()
+            self._draw()
             last_time = time.perf_counter()
             self._handle_input()
             self._game_status_check()
-            self._brick_paddle_collision()
-            self._draw()
             while time.perf_counter() - last_time < self._refresh_time:
                 pass
 
@@ -490,6 +521,7 @@ class Game:
         for bomb in self.__bombs:
             if self.__paddle.get_x - 1 <= bomb.get_x <= self.__paddle.get_x + self.__paddle.get_shape[0] * 2 \
                     and bomb.get_y == self.__paddle.get_y - 1:
+                pass
                 self.__lives -= 1
 
     def _detect_ball_paddle_collision(self):
@@ -510,12 +542,12 @@ class Game:
                         ball.set_temp_velocity(ball.get_velocity)
                     ball.set_velocity([0, 0])
 
-    def _drop_power_up(self, brick_hit):
+    def _drop_power_up(self, brick_hit, initial_velocity=[0, -0.5]):
         """To decide if a power up spawns at the place where the brick was broken"""
         self.__score += 100
         probability_of_power_up = random.random()
         if probability_of_power_up <= config.POWER_UP_DROP_PROBABILITY:
-            variety = random.randint(7, 7)
+            variety = random.randint(1, 7)
             switcher = {
                 1: ExpandPaddle(),
                 2: ShrinkPaddle(),
@@ -528,23 +560,29 @@ class Game:
             power_up = switcher[variety]
             power_up.set_x(brick_hit.get_x + 2)
             power_up.set_y(brick_hit.get_y)
+            power_up.set_velocity(initial_velocity)
             self.__power_up_shown.append(power_up)
 
     def _detect_ufo_ball_collision(self):
+        max_x = -1
+        min_x = 300
+        for piece in self.__boss:
+            if max_x < piece.get_x:
+                max_x = piece.get_x
+            if min_x > piece.get_x:
+                min_x = piece.get_x
         for ball in self.__balls:
             iterations = 20
-            piece_hit = None
+            # piece_hit = None
             step = 0
             got = False
             for i in range(1, iterations + 1):
                 x_f = ball.get_x + i * ball.get_velocity[0] / iterations + 0.5  # (1 1)
                 y_f = ball.get_y - i * ball.get_velocity[1] / iterations
-                for j, piece in enumerate(self.__boss):
-                    if _collision_checker(piece, x_f, y_f):
-                        piece_hit = piece
-                        step = i
-                        got = True
-                        break
+                if min_x <= x_f <= max_x and 0 <= y_f <= 14:
+                    step = i
+                    got = True
+                    break
                 if got:
                     break
 
@@ -554,24 +592,20 @@ class Game:
             x_previous = ball.get_x + (step - 1) * ball.get_velocity[0] / iterations + 0.5
             y_previous = ball.get_y - (step - 1) * ball.get_velocity[1] / iterations
 
-            if piece_hit.get_x - 1 <= x_previous <= piece_hit.get_x + piece_hit.get_shape[0] * 2 + 1 \
-                    and (
-                    y_previous < piece_hit.get_y or y_previous >= piece_hit.get_y + piece_hit.get_shape[1] - 1):
-                ball.set_x(floor(x_previous))
-                if y_previous < piece_hit.get_y:
-                    ball.set_y(piece_hit.get_y - 1)
-                else:
-                    ball.set_y(piece_hit.get_y + piece_hit.get_shape[1])
+            if y_previous >= 14:
+                ball.set_y(14)
                 ball.set_velocity([ball.get_velocity[0], -1 * ball.get_velocity[1]])
-
-            elif piece_hit.get_x >= x_previous or x_previous >= piece_hit.get_x + piece_hit.get_shape[0] * 2 \
-                    and (piece_hit.get_y <= y_previous < piece_hit.get_y + piece_hit.get_shape[1]):
-                if piece_hit.get_x >= x_previous:
-                    ball.set_x(piece_hit.get_x - 2)
-                else:
-                    ball.set_x(piece_hit.get_x + piece_hit.get_shape[0] * 2 - 1)
-                ball.set_y(int(y_previous))
-                ball.set_velocity([-1 * ball.get_velocity[0], ball.get_velocity[1]])
+            else:
+                if 2 * x_previous <= min_x + max_x:
+                    ball.set_x(min_x - 8)
+                    if ball.get_velocity[0] == 0:
+                        ball.set_velocity([-2, ball.get_velocity[1]])
+                    ball.set_velocity([-1 * abs(ball.get_velocity[0]), ball.get_velocity[1]])
+                elif 2 * x_previous >= max_x + min_x:
+                    ball.set_x(max_x + 8)
+                    if ball.get_velocity[0] == 0:
+                        ball.set_velocity([2, ball.get_velocity[1]])
+                    ball.set_velocity([abs(ball.get_velocity[0]), ball.get_velocity[1]])
 
     def _detect_bullet_brick_collision(self):
         temp_bullets = []
@@ -599,7 +633,7 @@ class Game:
                 self.__score += 100
             elif brick_hit.get_variety == 1:
                 del self.__bricks[index]
-                self._drop_power_up(brick_hit)
+                self._drop_power_up(brick_hit, [0, 1])
             elif brick_hit.get_variety != 4:
                 brick_hit.set_variety(brick_hit.get_variety - 1)
         self.__bullets = temp_bullets
@@ -630,6 +664,8 @@ class Game:
                 continue
             x_previous = ball.get_x + (step - 1) * ball.get_velocity[0] / iterations + 0.5
             y_previous = ball.get_y - (step - 1) * ball.get_velocity[1] / iterations
+
+            initial_power_up_velocity = ball.get_velocity
 
             if not ball.get_through_ball:
                 if brick_hit.get_x - 1 <= x_previous <= brick_hit.get_x + brick_hit.get_shape[0] * 2 + 1 \
@@ -664,7 +700,10 @@ class Game:
                 if brick_hit.get_variety == 4:
                     self.__unbreakable_bricks -= 1
                 del self.__bricks[index]
-                self._drop_power_up(brick_hit)
+                if self.__level != 3:
+                    self._drop_power_up(brick_hit, initial_power_up_velocity)
+                else:
+                    self.__score += 100
             else:
                 if brick_hit.get_variety != 4:
                     brick_hit.set_variety(brick_hit.get_variety - 1)

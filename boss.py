@@ -30,11 +30,12 @@ class Boss(GenericObject):
         if self._variety == 4:
             return config.BACK_COLOR + "🚀"
 
+
 class Bomb(GenericObject):
     TYPE = "bomb"
 
     def __init__(self):
-        super().__init__([1, 1], config.BACK_COLOR + "💣")
+        super().__init__([1, 1], config.BOMB_BACKGROUND + "💣")
 
     def update_bomb(self):
         self.set_y(self.get_y + 0.5)
