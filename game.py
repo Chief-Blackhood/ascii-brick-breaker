@@ -387,8 +387,8 @@ class Game:
                   (config.FRAME_WIDTH - 9 - len(str(self.__score))) * " ")
         if self.__level == 3:
             print("Boss Health:",
-                  self.__boss_health,
-                  (config.FRAME_WIDTH - 16 - len(str(self.__score))) * " ")
+                  (self.__boss_health//10) * "🟥",
+                  (config.FRAME_WIDTH - 33 - len(str(self.__score))) * " ")
 
     def _update_level(self):
         self.__level += 1
@@ -474,19 +474,19 @@ class Game:
             if self.__level == 3:
                 self._detect_ufo_ball_collision()
                 if self.__boss_health == 70 and not self.__first_layer:
-                    for i in range(13):
+                    for i in range(15):
                         brick = Brick()
-                        brick.set_y(18)
-                        brick.set_x(i * brick.get_shape[0] * 2 + 29)
+                        brick.set_y(20)
+                        brick.set_x(i * brick.get_shape[0] * 2 + 21)
                         brick.set_variety(1 if i % 2 == 0 else 2)
                         self.__bricks.append(brick)
                     self.__first_layer = True
 
                 if self.__boss_health == 30 and not self.__second_layer:
-                    for i in range(15):
+                    for i in range(13):
                         brick = Brick()
-                        brick.set_y(20)
-                        brick.set_x(i * brick.get_shape[0] * 2 + 21)
+                        brick.set_y(18)
+                        brick.set_x(i * brick.get_shape[0] * 2 + 29)
                         brick.set_variety(1 if i % 2 == 0 else 2)
                         self.__bricks.append(brick)
                     self.__second_layer = True
